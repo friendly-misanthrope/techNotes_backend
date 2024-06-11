@@ -10,7 +10,7 @@ const logEvents = async (msg, fileName) => {
   const logPath = path.join(__dirname, '..', 'logs')
 
   try {
-    if (!fs.existsSync(path.join(logPath))) {
+    if (!fs.existsSync(logPath)) {
       await fsPromises.mkdir(logPath);
     }
     await fsPromises.appendFile(path.join(logPath, fileName), logItem);
