@@ -4,6 +4,8 @@ const path = require('path');
 const { logger } = require('./middleware/logger');
 const { errHandler } = require('./middleware/errHandler');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const corsOptions = require('./config/corsOptions');
 const PORT = process.env.PORT || 3500;
 
 /* CUSTOM MIDDLEWARE */
@@ -13,7 +15,9 @@ app.use(logger);
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 /* THIRD-PARTY MIDDLEWARE */
-app.use(cookieParser);
+app.use(cookieParser());
+app.use(cors(corsOptions));
+
 
 /* ROUTES */
 app.use('/', require('./routes/root.route'));
