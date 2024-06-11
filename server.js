@@ -18,7 +18,7 @@ app.all('*', (req, res) => {
   } else if (req.accepts('json')) {
     res.json({message: "404 Not Found"});
   } else {
-    res.type('text').send("404 Not Found")
+    res.type('text').send("404 Not Found");
   }
 })
 
