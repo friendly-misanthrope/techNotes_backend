@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const logEvents = async (msg, fileName) => {
-  const dateTime = `${format(new Date(), 'yyMMdd\tHH:mm:ss')}`;
+  const dateTime = `${format(new Date(), 'yyyyMMdd\tHH:mm:ss')}`;
   const logItem = `${dateTime}\t${uuid()}\t${msg}\n`;
   const logPath = path.join(__dirname, '..', 'logs')
 
