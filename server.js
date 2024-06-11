@@ -3,11 +3,14 @@ const app = express();
 const path = require('path');
 const PORT = process.env.PORT || 3500;
 
+/* BUILT-IN MIDDLEWARE */
 app.use('/', express.static(path.join(__dirname, 'public')));
+
+/* ROUTES */
 app.use('/', require('./routes/root.route'));
 
 
-
+/* 404 CATCH-ALL */
 app.all('*', (req, res) => {
   res.status(404);
   if (req.accepts('html')) {
@@ -19,6 +22,7 @@ app.all('*', (req, res) => {
   }
 })
 
+/* REQUEST LISTENER */
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 })
