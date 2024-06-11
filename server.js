@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
 const PORT = process.env.PORT || 3500;
+require('./config/mongoose.config');
 
 /* CUSTOM MIDDLEWARE */
 app.use(logger);
