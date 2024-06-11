@@ -1,7 +1,11 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const { logger } = require('./middleware/logger')
 const PORT = process.env.PORT || 3500;
+
+/* CUSTOM MIDDLEWARE */
+app.use(logger);
 
 /* BUILT-IN MIDDLEWARE */
 app.use('/', express.static(path.join(__dirname, 'public')));
