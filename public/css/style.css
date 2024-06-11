@@ -11,6 +11,20 @@ html {
     font-size: 2.5rem;
 }
 
+img {
+  margin: 1rem auto;
+  border-radius: 1rem;
+}
+
+p {
+  margin: 0 auto;
+}
+
+a {
+  color: whitesmoke;
+  margin: 0 auto;
+}
+
 body {
     min-height: 100vh;
     background-color: #000;
