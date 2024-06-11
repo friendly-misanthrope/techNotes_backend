@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const { logger } = require('./middleware/logger')
+const { logger } = require('./middleware/logger');
 const PORT = process.env.PORT || 3500;
 
 /* CUSTOM MIDDLEWARE */
@@ -24,7 +24,7 @@ app.all('*', (req, res) => {
   } else {
     res.type('text').send("404 Not Found");
   }
-})
+});
 
 /* REQUEST LISTENER */
 app.listen(PORT, () => {
