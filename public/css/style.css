@@ -23,13 +23,15 @@ p {
 a {
   color: whitesmoke;
   margin: 0 auto;
+  margin: 1rem 0 0;
 }
 
 body {
     min-height: 100vh;
-    background-color: #000;
+    background-color: #0a0a0a;
     color: whitesmoke;
     display: grid;
     place-content: center;
     padding: 1rem;
+    text-align: center;
 }
