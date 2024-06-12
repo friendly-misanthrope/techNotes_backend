@@ -26,4 +26,13 @@ const UserSchema = new mongoose.Schema({
   toObject: { virutals: true }
 });
 
+/* Virtual confirmPassword field */
+UserSchema.virtual('confirmPassword')
+  .set(function (confPass) {
+    this._confirmPassword = confPass
+  })
+  .get(function () {
+    return this._confirmPassword
+  });
+
 module.exports = mongoose.model('User', UserSchema)
