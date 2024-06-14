@@ -12,4 +12,8 @@ const getUserById = asyncHandler(async (req, res) => {
 
 });
 
+const registerUser = asyncHandler(async (req, res) => {
+
+});
+
 module.exports = { getAllUsers }
