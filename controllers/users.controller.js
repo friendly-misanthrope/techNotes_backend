@@ -6,6 +6,10 @@ const argon2 = require('argon2');
 // Get all users
 const getAllUsers = asyncHandler(async (req, res) => {
 
-})
+});
+
+const getUserById = asyncHandler(async (req, res) => {
+
+});
 
 module.exports = { getAllUsers }
