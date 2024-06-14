@@ -24,4 +24,10 @@ const removeUser = asyncHandler(async (req, res) => {
 
 });
 
-module.exports = { getAllUsers }
+module.exports = {
+  getAllUsers,
+  getUserById,
+  registerUser,
+  updateUser,
+  removeUser
+}
