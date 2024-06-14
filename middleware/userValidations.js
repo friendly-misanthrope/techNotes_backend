@@ -1,5 +1,4 @@
 const Users = require('../models/User.model');
-const asyncHandler = require('express-async-handler');
 
 const validateUsername = (req, res) => {
   const { username } = req.body;
