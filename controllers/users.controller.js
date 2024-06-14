@@ -7,13 +7,19 @@ const argon2 = require('argon2');
 const getAllUsers = asyncHandler(async (req, res) => {
   const allUsers = await Users.find().select('-password').lean();
   if (!allUsers) {
-    return res.status(400).json({message: "No users found"});
+    return res.status(400).json({ message: "No users found" });
   }
   res.status(201).json(allUsers);
 });
 
 const getUserById = asyncHandler(async (req, res) => {
-
+  const user = await Users.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({
+      message: `No user with id ${req.params.id} found.`
+    });
+  }
+  res.status(200).json(user).select('-password').lean();
 });
 
 const registerUser = asyncHandler(async (req, res) => {
