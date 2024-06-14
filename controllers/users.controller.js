@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
     parallelism: 1
   });
 
-  await Users.create({
+  const newUser = await Users.create({
     username,
     password: pwHash
   });
