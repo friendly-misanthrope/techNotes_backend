@@ -16,4 +16,12 @@ const registerUser = asyncHandler(async (req, res) => {
 
 });
 
+const updateUser = asyncHandler(async (req, res) => {
+
+});
+
+const removeUser = asyncHandler(async (req, res) => {
+
+});
+
 module.exports = { getAllUsers }
