@@ -27,7 +27,6 @@ const NoteSchema = new mongoose.Schema({
   }
 
 }, {
-  toObject: { virtuals: true },
   timestamps: true
 });
 
