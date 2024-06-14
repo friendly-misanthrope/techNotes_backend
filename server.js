@@ -14,6 +14,7 @@ app.use(logger);
 
 /* BUILT-IN MIDDLEWARE */
 app.use('/', express.static(path.join(__dirname, 'public')));
+app.use(express.json())
 
 /* THIRD-PARTY MIDDLEWARE */
 app.use(cookieParser());
