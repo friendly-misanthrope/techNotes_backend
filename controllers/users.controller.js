@@ -13,6 +13,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json(allUsers);
 });
 
+
+// Get a user by ID
 const getUserById = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const user = await Users.findById(id).select('-password').lean().exec();
@@ -25,6 +27,7 @@ const getUserById = asyncHandler(async (req, res) => {
 });
 
 
+// Register a new user
 const registerUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
@@ -61,10 +64,14 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+
+// Update an existing user
 const updateUser = asyncHandler(async (req, res) => {
 
 });
 
+
+// Delete an existing user
 const removeUser = asyncHandler(async (req, res) => {
 
 });
