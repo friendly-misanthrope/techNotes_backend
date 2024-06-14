@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const NoteSchema = new mongoose.Schema({
   assignedUser: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
-  },
-  ticketNumber: {
-    type: Number,
-
   },
   title: {
     type: String,
@@ -28,6 +25,12 @@ const NoteSchema = new mongoose.Schema({
 
 }, {
   timestamps: true
+});
+
+NoteSchema.plugin(AutoIncrement, {
+  inc_field: 'ticketNum',
+  id: 'ticketNums',
+  start_seq: 4269
 });
 
 module.exports = mongoose.model('Note', NoteSchema);
