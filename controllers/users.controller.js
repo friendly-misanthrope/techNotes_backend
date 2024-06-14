@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (newUser) {
-    res.status(201).json({
+    return res.status(201).json({
       message: `User ${username} created successfully.`,
       newUser
     });
@@ -53,8 +53,6 @@ const registerUser = asyncHandler(async (req, res) => {
       message: "Invalid user data recieved"
     });
   }
-
-
 });
 
 const updateUser = asyncHandler(async (req, res) => {
