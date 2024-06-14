@@ -7,10 +7,10 @@ const argon2 = require('argon2');
 // Get all users
 const getAllUsers = asyncHandler(async (req, res) => {
   const allUsers = await Users.find().select('-password').lean();
-  if (!allUsers) {
+  if (allUsers.length < 1) {
     return res.status(400).json({ message: "No users found" });
   }
-  res.status(201).json(allUsers);
+  res.status(200).json(allUsers);
 });
 
 const getUserById = asyncHandler(async (req, res) => {
