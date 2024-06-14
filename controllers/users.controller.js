@@ -48,8 +48,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const pwHash = await argon2.hash(password, {
     type: argon2.argon2id,
-    memoryCost: 12288,
-    timeCost: 3,
+    memoryCost: 19456,
+    timeCost: 2,
     parallelism: 1
   });
 
