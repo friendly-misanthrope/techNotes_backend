@@ -23,10 +23,11 @@ const getUserById = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
-const registerUser = asyncHandler(async (req, res) => {
-  const { username, password, confirmPassword, roles } = req.body;
 
-  if (!username || !password || !Array.isArray(roles) || !roles.length) {
+const registerUser = asyncHandler(async (req, res) => {
+  const { username, password, confirmPassword } = req.body;
+
+  if (!username || !password) {
     return res.status(400).json({
       message: "All fields are required"
     });
@@ -52,14 +53,21 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const newUser = await Users.create({
     username,
-    password: pwHash,
-    roles
-  }).select('-password').lean().exec();
+    password: pwHash
+  })
 
-  res.status(201).json({
-    message: `User ${username} created successfully.`,
-    newUser: newUser
-  });
+  if (newUser) {
+    res.status(201).json({
+      message: `User ${username} created successfully.`,
+      newUser: newUser
+    });
+  } else {
+    res.status(400).json({
+      message: "Invalid user data recieved"
+    });
+  }
+
+
 });
 
 const updateUser = asyncHandler(async (req, res) => {
