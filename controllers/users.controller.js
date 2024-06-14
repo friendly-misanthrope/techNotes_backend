@@ -38,15 +38,14 @@ const registerUser = asyncHandler(async (req, res) => {
     parallelism: 1
   });
 
-  const newUser = await Users.create({
+  await Users.create({
     username,
     password: pwHash
   });
 
   if (newUser) {
     return res.status(201).json({
-      message: `User ${username} created successfully.`,
-      newUser
+      message: `User ${username} created successfully.`
     });
   } else {
     res.status(400).json({
