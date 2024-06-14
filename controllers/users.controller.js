@@ -17,6 +17,11 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // Get a user by ID
 const getUserById = asyncHandler(async (req, res) => {
   const id = req.params.id;
+  if (id.length !== 24) {
+    return res.status(400).json({
+      message: "Invalid ObjectId for user"
+    });
+  }
   const user = await Users.findById(id).select('-password').lean().exec();
   if (!user) {
     return res.status(404).json({
