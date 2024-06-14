@@ -28,6 +28,13 @@ const getUserById = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
+  const duplicate = await Users.findOne({ username: username }).lean().exec();
+  if (duplicate) {
+    return res.status(409).json({
+      message: `Username ${username} already exists`
+    });
+  }
+
   validateUsername(req, res);
   validatePassword(req, res);
 

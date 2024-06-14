@@ -1,7 +1,7 @@
 const Users = require('../models/User.model');
 const asyncHandler = require('express-async-handler');
 
-const validateUsername = asyncHandler(async (req, res) => {
+const validateUsername = (req, res) => {
   const { username } = req.body;
   if (!username) {
     return res.status(400).json({
@@ -12,13 +12,7 @@ const validateUsername = asyncHandler(async (req, res) => {
       message: "Username must be between 4 and 24 characters"
     });
   }
-  const duplicate = await Users.findOne({ username: username }).lean().exec();
-  if (duplicate) {
-    return res.status(409).json({
-      message: `Username ${username} already exists`
-    });
-  }
-});
+}
 
 const validatePassword = (req, res) => {
   const { password, confirmPassword } = req.body;
