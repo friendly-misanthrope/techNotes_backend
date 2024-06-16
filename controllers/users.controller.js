@@ -9,7 +9,7 @@ const {
   validateUserStatus
 } = require('../middleware/userValidations');
 
-// Get all users
+/* GET ALL USERS */
 const getAllUsers = asyncHandler(async (req, res) => {
   const allUsers = await Users.find().select('-password').lean();
   if (!allUsers?.length) {
@@ -19,7 +19,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 
-// Get a user by ID
+/* GET ONE USER BY ID */
 const getUserById = asyncHandler(async (req, res) => {
   const id = req.params.id;
   if (!validateObjId(req, res)) {
@@ -36,7 +36,7 @@ const getUserById = asyncHandler(async (req, res) => {
 });
 
 
-// Register a new user
+/* REGISTER NEW USER */
 const registerUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
@@ -79,8 +79,8 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-//! 
-// Update an existing user
+
+/* UPDATE EXISTING USER */
 const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   if (!validateObjId(req, res)) {
@@ -159,7 +159,7 @@ const updateUser = asyncHandler(async (req, res) => {
 });
 
 
-// Delete an existing user
+/* DELETE AN EXISTING USER */
 const removeUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   if (!validateObjId(req, res)) {
