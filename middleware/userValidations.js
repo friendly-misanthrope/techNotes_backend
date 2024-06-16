@@ -1,5 +1,3 @@
-const Users = require('../models/User.model');
-
 const validateUsername = (req, res) => {
   const { username } = req.body;
   if (!username) {
