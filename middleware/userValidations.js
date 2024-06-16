@@ -42,9 +42,25 @@ const validateObjId = (req, res) => {
   }
 }
 
+const validateUserStatus = (req, res) => {
+  const { roles, isActive } = req.body;
+  if (!Array.isArray(roles) || typeof(roles[0] !== 'string')) {
+    res.status(400).json({
+      message: `Invalid roles data`
+    })
+    return false;
+  } else if (typeof(isActive) !== 'boolean'){
+    res.status(400).json({
+      message: `isActive must be a boolean value`
+    })
+    return false;
+  }
+}
+
 
 module.exports = {
   validateUsername,
   validatePassword,
-  validateObjId
+  validateObjId,
+  validateUserStatus
 }
