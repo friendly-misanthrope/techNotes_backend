@@ -50,17 +50,18 @@ const validateObjId = (req, res) => {
 
 const validateUserStatus = (req, res) => {
   const { roles, isActive } = req.body;
+
   if (!Array.isArray(roles) ||
-    roles.length < 1 ||
-    typeof (roles[0] !== 'string')) {
+    !roles.length ||
+    typeof (roles[0]) != 'string') {
     res.status(400).json({
-      message: `Invalid roles data`
-    })
+      message: "Invalid roles data"
+    });
     return false;
-  } else if (typeof(isActive) !== 'boolean') {
+  } else if (typeof (isActive) !== 'boolean') {
     res.status(400).json({
       message: `isActive must be a boolean value`
-    })
+    });
     return false;
   }
   return true;
