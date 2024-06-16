@@ -100,7 +100,6 @@ const updateUser = asyncHandler(async (req, res) => {
 
   // validate user data
   if (!validateUsername(req, res) ||
-    !validatePassword(req, res) ||
     !validateUserStatus(req, res)) {
     return;
   }
