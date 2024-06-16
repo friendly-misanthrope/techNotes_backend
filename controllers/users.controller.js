@@ -72,11 +72,13 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-
+//! 
 // Update an existing user
 const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  validateObjId(req, res);
+  if (!validateObjId) {
+    return;
+  }
 
   // Ensure user with provided ID exists
   const existingUser = await Users.findById(id).lean().exec();
@@ -93,8 +95,14 @@ const updateUser = asyncHandler(async (req, res) => {
     isActive
   } = req.body;
 
+  // validate user data
+  if (!validateUsername(req, res) ||
+    !validatePassword(req, res) ||
+    !validateUserStatus(req, res)) {
+    return;
+  }
+
   // Validate username and look for duplicates with a different ObjectID
-  validateUsername(req, res);
   const duplicate = await Users.findOne({ username }).lean().exec();
 
   if (duplicate && duplicate._id.toString() !== id) {
@@ -108,7 +116,7 @@ const updateUser = asyncHandler(async (req, res) => {
     if (!validatePassword(req, res)) {
       return;
     }
-    
+
     pwHash = await argon2.hash(password, {
       type: argon2.argon2id,
       memoryCost: 19456,
