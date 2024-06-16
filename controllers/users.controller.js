@@ -45,7 +45,9 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   validateUsername(req, res);
-  validatePassword(req, res);
+  if (!validatePassword(req, res)) {
+    return;
+  }
 
   const pwHash = await argon2.hash(password, {
     type: argon2.argon2id,
