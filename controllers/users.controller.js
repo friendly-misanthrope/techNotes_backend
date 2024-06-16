@@ -21,7 +21,9 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // Get a user by ID
 const getUserById = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  validateObjId(req, res);
+  if (!validateObjId(req, res)) {
+    return;
+  }
 
   const user = await Users.findById(id).select('-password').lean().exec();
   if (!user) {
