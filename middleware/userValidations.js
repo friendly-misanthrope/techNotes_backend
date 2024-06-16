@@ -3,14 +3,17 @@ const Users = require('../models/User.model');
 const validateUsername = (req, res) => {
   const { username } = req.body;
   if (!username) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Username is required"
     });
+    return false;
   } else if (username.length < 4 || username.length > 24) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Username must be between 4 and 24 characters"
     });
+    return false;
   }
+  return true;
 }
 
 const validatePassword = (req, res) => {
@@ -31,15 +34,18 @@ const validatePassword = (req, res) => {
     })
     return false;
   }
+  return true;
 }
 
 const validateObjId = (req, res) => {
   const id = req.params.id;
   if (id.length !== 24) {
-    return res.status(400).json({
+    res.status(400).json({
       message: `Invalid ObjectId for user`
     });
+    return false;
   }
+  return true;
 }
 
 const validateUserStatus = (req, res) => {
