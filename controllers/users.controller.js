@@ -166,9 +166,9 @@ const removeUser = asyncHandler(async (req, res) => {
     return;
   }
   // only allow user to be deleted if no open notes are assigned
-  const userNotes = await Notes.findOne({ assignedUser: id }).lean().exec();
+  const userNoteExists = await Notes.findOne({ assignedUser: id }).lean().exec();
 
-  if (userNotes?.length) {
+  if (userNoteExists) {
     return res.status(400).json({
       message: `User ${id} cannot be deleted because they have notes assigned`
     });
