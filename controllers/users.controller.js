@@ -5,7 +5,8 @@ const argon2 = require('argon2');
 const {
   validateUsername,
   validatePassword,
-  validateObjId
+  validateObjId,
+  validateUserStatus
 } = require('../middleware/userValidations');
 
 // Get all users
@@ -46,7 +47,6 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   }
 
-  validateUsername(req, res);
   if (!validatePassword(req, res) ||
     !validateUsername(req, res)) {
     return;
@@ -105,7 +105,7 @@ const updateUser = asyncHandler(async (req, res) => {
     return;
   }
 
-  // Validate username and look for duplicates with a different ObjectID
+  // Look for username duplicates with a different ObjectID
   const duplicate = await Users.findOne({ username }).lean().exec();
 
   if (duplicate && duplicate._id.toString() !== id) {
@@ -119,7 +119,6 @@ const updateUser = asyncHandler(async (req, res) => {
     if (!validatePassword(req, res)) {
       return;
     }
-
     pwHash = await argon2.hash(password, {
       type: argon2.argon2id,
       memoryCost: 19456,
