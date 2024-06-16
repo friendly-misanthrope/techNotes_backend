@@ -40,18 +40,21 @@ const getUserById = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
+  // Check for duplicate usernames
   const duplicate = await Users.findOne({ username: username }).lean().exec();
   if (duplicate) {
     return res.status(409).json({
-      message: `Username ${username} already exists`
+      message: `Username ${username} is taken`
     });
   }
 
+  // Validate user and password
   if (!validatePassword(req, res) ||
     !validateUsername(req, res)) {
     return;
   }
 
+  // Hash password
   const pwHash = await argon2.hash(password, {
     type: argon2.argon2id,
     memoryCost: 19456,
@@ -59,6 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
     parallelism: 1
   });
 
+  // Create user with username and hashed password
   const newUser = await Users.create({
     username,
     password: pwHash
@@ -79,7 +83,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // Update an existing user
 const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  if (!validateObjId) {
+  if (!validateObjId(req, res)) {
     return;
   }
 
@@ -110,7 +114,7 @@ const updateUser = asyncHandler(async (req, res) => {
   if (duplicate && duplicate._id.toString() !== id) {
     return res.status(409).json({
       message: "This username is taken"
-    })
+    });
   }
 
   //  If a new pw is provided, validate/hash it and update user
@@ -118,37 +122,40 @@ const updateUser = asyncHandler(async (req, res) => {
     if (!validatePassword(req, res)) {
       return;
     }
+
     pwHash = await argon2.hash(password, {
       type: argon2.argon2id,
       memoryCost: 19456,
       timeCost: 2,
       parallelism: 1
-    })
+    });
 
     const updatedUser = await Users.findByIdAndUpdate(id,
       { username, roles, password: pwHash, isActive },
       { new: true }
-    )
+    );
+
     if (updatedUser) {
       return res.status(200).json({
         message: `User ${username} updated successfully`,
-      })
+      });
     }
     // If no new pw provided, update user with pw field omitted
   } else {
     const updatedUser = await Users.findByIdAndUpdate(id,
       { username, roles, isActive },
       { new: true }
-    )
+    );
+
     if (updatedUser) {
       return res.status(200).json({
         message: `User ${username} updated successfully`,
-      })
+      });
     }
   }
   return res.status(400).json({
-    message: "Bad user update data received"
-  })
+    message: "Invalid user update data"
+  });
 });
 
 
