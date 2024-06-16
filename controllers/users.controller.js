@@ -45,7 +45,8 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   validateUsername(req, res);
-  if (!validatePassword(req, res)) {
+  if (!validatePassword(req, res) ||
+    !validateUsername(req, res)) {
     return;
   }
 
