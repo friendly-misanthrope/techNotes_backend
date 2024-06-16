@@ -1,8 +1,12 @@
 const Users = require('../models/User.model');
 const Notes = require('../models/Note.model');
-const { validateUsername, validatePassword } = require('../middleware/userValidations')
 const asyncHandler = require('express-async-handler');
 const argon2 = require('argon2');
+const {
+  validateUsername,
+  validatePassword,
+  validateObjId
+} = require('../middleware/userValidations');
 
 // Get all users
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -17,11 +21,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // Get a user by ID
 const getUserById = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  if (id.length !== 24) {
-    return res.status(400).json({
-      message: "Invalid ObjectId for user"
-    });
-  }
+  validateObjId(req, res);
+
   const user = await Users.findById(id).select('-password').lean().exec();
   if (!user) {
     return res.status(404).json({
@@ -72,8 +73,45 @@ const registerUser = asyncHandler(async (req, res) => {
 
 // Update an existing user
 const updateUser = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  validateObjId(req, res);
 
-});
+  const existingUser = await Users.findById(id).exec().lean();
+  if (!existingUser) {
+    return res.status(400).json({
+      message: `No user with ID ${id} found`
+    });
+  }
+
+  const {
+    username,
+    password,
+    confirmPassword,
+    roles,
+    isActive
+  } = req.body;
+
+  const duplicate = await Users.findOne({ username }).lean().exec();
+
+  if (duplicate && duplicate._id.toString() !== id) {
+    return res.status(409).json({
+      message: "This username is taken"
+    })
+  }
+
+  validateUsername(req, res);
+
+
+  if (password) {
+    validatePassword(req, res);
+    }
+    existingUser.password = await argon2.hash(password, {
+      type: argon2.argon2id,
+      memoryCost: 19456,
+      timeCost: 2,
+      parallelism: 1
+    })
+  });
 
 
 // Delete an existing user
