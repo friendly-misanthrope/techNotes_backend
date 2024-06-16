@@ -12,7 +12,7 @@ const {
 // Get all users
 const getAllUsers = asyncHandler(async (req, res) => {
   const allUsers = await Users.find().select('-password').lean();
-  if (allUsers.length < 1) {
+  if (!allUsers?.length) {
     return res.status(400).json({ message: "No users found" });
   }
   res.status(200).json(allUsers);
@@ -161,7 +161,38 @@ const updateUser = asyncHandler(async (req, res) => {
 
 // Delete an existing user
 const removeUser = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  if (!validateObjId(req, res)) {
+    return;
+  }
+  // only allow user to be deleted if no open notes are assigned
+  const userNotes = await Notes.findOne({ assignedUser: id }).lean().exec();
 
+  if (userNotes?.length) {
+    return res.status(400).json({
+      message: `User ${id} cannot be deleted because they have notes assigned`
+    });
+  }
+
+  // get user from DB
+  const userToDelete = await Users.findById(id).lean().exec();
+
+  // Ensure user exists before proceeding
+  if (!userToDelete) {
+    return res.status(400).json({
+      message: `No user with ID ${id} found`
+    });
+  }
+
+  // find user by ID and delete
+  const result = await Users.findOneAndDelete({_id: id});
+
+  // Send response 200 if user is deleted successfully
+  if (result) {
+    res.status(200).json({
+      message: `User ${result.username} with ID ${result._id} deleted successfully`
+    });
+  }
 });
 
 module.exports = {
