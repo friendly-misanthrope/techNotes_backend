@@ -132,7 +132,6 @@ const updateUser = asyncHandler(async (req, res) => {
     if (updatedUser) {
       return res.status(200).json({
         message: `User ${username} updated successfully`,
-        updatedUser
       })
     }
     // If no new pw provided, update user with pw field omitted
@@ -144,7 +143,6 @@ const updateUser = asyncHandler(async (req, res) => {
     if (updatedUser) {
       return res.status(200).json({
         message: `User ${username} updated successfully`,
-        updatedUser
       })
     }
   }
