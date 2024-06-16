@@ -53,7 +53,7 @@ const validateUserStatus = (req, res) => {
 
   if (!Array.isArray(roles) ||
     !roles.length ||
-    typeof (roles[0]) != 'string') {
+    typeof (roles[0]) !== 'string') {
     res.status(400).json({
       message: "Invalid roles data"
     });
