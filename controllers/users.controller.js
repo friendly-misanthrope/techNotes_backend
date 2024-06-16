@@ -76,7 +76,8 @@ const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   validateObjId(req, res);
 
-  const existingUser = await Users.findById(id).exec().lean();
+  // Ensure user with provided ID exists
+  const existingUser = await Users.findById(id).lean().exec();
   if (!existingUser) {
     return res.status(400).json({
       message: `No user with ID ${id} found`
@@ -86,11 +87,12 @@ const updateUser = asyncHandler(async (req, res) => {
   const {
     username,
     password,
-    confirmPassword,
     roles,
     isActive
   } = req.body;
 
+  // Validate username and look for duplicates with a different ObjectID
+  validateUsername(req, res);
   const duplicate = await Users.findOne({ username }).lean().exec();
 
   if (duplicate && duplicate._id.toString() !== id) {
@@ -99,19 +101,46 @@ const updateUser = asyncHandler(async (req, res) => {
     })
   }
 
-  validateUsername(req, res);
-
-
+  //  If a new pw is provided, validate/hash it and update user
   if (password) {
-    validatePassword(req, res);
+    if (!validatePassword(req, res)) {
+      return;
     }
-    existingUser.password = await argon2.hash(password, {
+    
+    pwHash = await argon2.hash(password, {
       type: argon2.argon2id,
       memoryCost: 19456,
       timeCost: 2,
       parallelism: 1
     })
-  });
+
+    const updatedUser = await Users.findByIdAndUpdate(id,
+      { username, roles, password: pwHash, isActive },
+      { new: true }
+    )
+    if (updatedUser) {
+      return res.status(200).json({
+        message: `User ${username} updated successfully`,
+        updatedUser
+      })
+    }
+    // If no new pw provided, update user with pw field omitted
+  } else {
+    const updatedUser = await Users.findByIdAndUpdate(id,
+      { username, roles, isActive },
+      { new: true }
+    )
+    if (updatedUser) {
+      return res.status(200).json({
+        message: `User ${username} updated successfully`,
+        updatedUser
+      })
+    }
+  }
+  return res.status(400).json({
+    message: "Bad user update data received"
+  })
+});
 
 
 // Delete an existing user

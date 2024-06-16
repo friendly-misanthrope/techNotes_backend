@@ -16,17 +16,20 @@ const validateUsername = (req, res) => {
 const validatePassword = (req, res) => {
   const { password, confirmPassword } = req.body;
   if (!password) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Password is required"
     })
+    return false;
   } else if (password.length < 8 || password.length > 32) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Password must be between 8 and 32 characters"
-    });
+    })
+    return false;
   } else if (password !== confirmPassword) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Passwords do not match"
     })
+    return false;
   }
 }
 
