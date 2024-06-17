@@ -23,8 +23,8 @@ const getAllNotesWithUser = asyncHandler(async (req, res) => {
 /* GET ONE NOTE WITH ITS USER */
 const getOneNoteWithUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const note = await Notes.findById(id);
-  const user = await Users.findById(note.assignedUser);
+  const note = await Notes.findById(id).lean().exec();
+  const user = await Users.findById(note.assignedUser).lean().exec();
   const noteWithUser = { ...note, assignedUser: user };
   return res.status(200).json(noteWithUser);
 });
