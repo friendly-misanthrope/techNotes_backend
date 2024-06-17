@@ -36,40 +36,39 @@ const createNote = asyncHandler(async (req, res) => {
   const {
     assignedUserId,
     title,
-    content,
-    isCompleted
+    content
   } = req.body;
 
-  const foundUser = await Users.findbyId(assignedUserId).lean().exec();
+  const foundUser = await Users.findById(assignedUserId).lean().exec();
 
   if (!foundUser) {
     return res.status(400).json({
       message: `User with ID ${assignedUserId} not found`
     });
   }
-
+  
   const newNote = await Notes.create({
-    assignedUser: foundUser._id,
+    assignedUser: assignedUserId,
     title,
-    content,
-    isCompleted
+    content
   });
 
   if (newNote) {
     const updatedUser = await Users.findOneAndUpdate(
       { _id: newNote.assignedUser },
-      { ...foundUser, notes: foundUser.notes.push(newNote) },
+      {$push: { notes: newNote }},
       { new: true }
     );
+
     if (updatedUser) {
       return res.status(201).json({
         message: `New note '${newNote.title}' created and assigned to ${updatedUser.username}`
-      })
-    } else {
-      return res.status(400).json({
-        message: `Unable to update user with new note`
       });
     }
+  } else {
+    return res.status(400).json({
+      message: `Unable to update user with new note`
+    });
   }
   res.status(400).json({
     message: `Unable to create new note`
