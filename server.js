@@ -23,7 +23,8 @@ app.use(cors(corsOptions));
 
 /* ROUTES */
 app.use('/', require('./routes/root.route'));
-app.use('/users', require('./routes/users.route'))
+app.use('/users', require('./routes/users.route'));
+app.use('/notes', require('./routes/notes.route'));
 
 
 /* 404 CATCH-ALL */
