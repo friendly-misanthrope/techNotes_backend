@@ -84,7 +84,7 @@ const updateNote = asyncHandler(async (req, res) => {
 
 
 /* DELETE NOTE */
-const deleteNote = asyncHandler(async (req, res) => {
+const removeNote = asyncHandler(async (req, res) => {
 
 });
 
@@ -93,5 +93,5 @@ module.exports = {
   getOneNoteWithUser,
   createNote,
   updateNote,
-  deleteNote
+  removeNote
 }
