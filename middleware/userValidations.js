@@ -37,7 +37,7 @@ const validatePassword = (req, res) => {
 
 const validateObjId = (req, res) => {
   const id = req.params.id;
-  if (id.length !== 24) {
+  if (id.length !== 24 || isNaN(Number("0x" + id))) {
     res.status(400).json({
       message: `Invalid ObjectId for user`
     });
