@@ -10,8 +10,14 @@ const asyncHandler = require('express-async-handler');
 const getAllNotesWithUser = asyncHandler(async (req, res) => {
   const allNotes = await Notes.find().lean();
 
-  const notesWithUser = Promise.all(allNotes.map(asyncHandler(async (note) => {
-    const noteUser = await Users.findById(note.assignedUser).lean().exec();
+  if (!allNotes?.length) {
+    return res.status(400).json({
+      message: `No notes found`
+    });
+  }
+
+  const notesWithUser = await Promise.all(allNotes.map(asyncHandler(async (note) => {
+    const noteUser = await Users.findById(note.assignedUser).select('-password -notes').lean().exec();
     note.assignedUser = noteUser;
     return note;
   })));
@@ -24,7 +30,7 @@ const getAllNotesWithUser = asyncHandler(async (req, res) => {
 const getOneNoteWithUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const note = await Notes.findById(id).lean().exec();
-  const user = await Users.findById(note.assignedUser).lean().exec();
+  const user = await Users.findById(note.assignedUser).select('-password -notes').lean().exec();
   const noteWithUser = { ...note, assignedUser: user };
   return res.status(200).json(noteWithUser);
 });
@@ -46,7 +52,7 @@ const createNote = asyncHandler(async (req, res) => {
       message: `User with ID ${assignedUserId} not found`
     });
   }
-  
+
   const newNote = await Notes.create({
     assignedUser: assignedUserId,
     title,
@@ -56,7 +62,7 @@ const createNote = asyncHandler(async (req, res) => {
   if (newNote) {
     const updatedUser = await Users.findOneAndUpdate(
       { _id: newNote.assignedUser },
-      {$push: { notes: newNote }},
+      { $push: { notes: newNote } },
       { new: true }
     );
 
