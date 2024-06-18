@@ -8,14 +8,19 @@ const asyncHandler = require('express-async-handler');
 
 /* GET ALL NOTES WITH THEIR USER */
 const getAllNotesWithUser = asyncHandler(async (req, res) => {
+  
+  // Ensure that notes exist in DB
   const allNotes = await Notes.find().lean();
-
   if (!allNotes?.length) {
     return res.status(400).json({
       message: `No notes found`
     });
   }
 
+  // Iterate over notes - for every note,
+  // retrieve it's assigned user by ObjId
+  // and overwrite note.assignedUser with
+  // user doc
   const notesWithUser = await Promise.all(allNotes.map(asyncHandler(async (note) => {
     const noteUser = await Users.findById(note.assignedUser).select('-password -notes').lean().exec();
     note.assignedUser = noteUser;
@@ -45,20 +50,24 @@ const createNote = asyncHandler(async (req, res) => {
     content
   } = req.body;
 
+  // Ensure user exists in DB before assigning them a note
   const foundUser = await Users.findById(assignedUserId).lean().exec();
-
   if (!foundUser) {
     return res.status(400).json({
       message: `User with ID ${assignedUserId} not found`
     });
   }
 
+  // Create new note from req.body
   const newNote = await Notes.create({
     assignedUser: assignedUserId,
     title,
     content
   });
 
+  // If note was created successfully,
+  // push note's ObjectId to assignedUser's
+  // notes array
   if (newNote) {
     const updatedUser = await Users.findOneAndUpdate(
       { _id: newNote.assignedUser },
@@ -66,11 +75,15 @@ const createNote = asyncHandler(async (req, res) => {
       { new: true }
     );
 
+    // If user updated successfully,
+    // return response status 201 with success message
     if (updatedUser) {
       return res.status(201).json({
         message: `New note '${newNote.title}' created and assigned to ${updatedUser.username}`
       });
     }
+    // If unable to create note or user,
+    // send 400 bad req with appropriate message
   } else {
     return res.status(400).json({
       message: `Unable to update user with new note`
@@ -84,7 +97,7 @@ const createNote = asyncHandler(async (req, res) => {
 
 /* UPDATE NOTE AND/OR ITS ASSIGNED USER */
 const updateNote = asyncHandler(async (req, res) => {
-
+  
 });
 
 
