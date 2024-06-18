@@ -2,7 +2,7 @@ const Notes = require('../models/Note.model');
 const Users = require('../models/User.model');
 const asyncHandler = require('express-async-handler');
 
-// Custom validation middleware here
+// toDo: import custom validation middleware here
 
 
 
@@ -36,6 +36,7 @@ const getAllNotesWithUser = asyncHandler(async (req, res) => {
 
 /* GET ONE NOTE WITH ITS USER */
 const getOneNoteWithUser = asyncHandler(async (req, res) => {
+
   const id = req.params.id;
 
   // Find note and user in DB
@@ -108,8 +109,76 @@ const createNote = asyncHandler(async (req, res) => {
 
 
 /* UPDATE NOTE AND/OR ITS ASSIGNED USER */
+// toDo: Ensure there's no duplicate note title belonging to the assigned user
 const updateNote = asyncHandler(async (req, res) => {
+  
+  // Validate note ObjId
+  const id = req.params.id;
+  if (!validateObjId(req, res)) {
+    return;
+  }
 
+  const {
+    assignedUserId,
+    title,
+    content,
+    isCompleted
+  } = req.body;
+
+  // Ensure note exists
+  const noteToUpdate = await Notes.findById(id)
+    .lean().exec();
+  if (!noteToUpdate) {
+    return res.status(400).json({
+      message: `Note with ID ${id} not found`
+    });
+  }
+
+  //toDo:  if assignedUserId changes,
+  //todo   remove note from old user
+  //todo   and assign it to the new user
+  if (noteToUpdate.assignedUser !== assignedUserId) {
+    const userToRemoveNoteFrom = await Users.findOneAndUpdate(
+      { _id: noteToUpdate.assignedUser },
+      // pull note id from old user, push to new user
+      { $pull: { notes: noteToUpdate } }
+    );
+    if (!userToRemoveNoteFrom) {
+      return res.status(400).json({
+        message: `Could not remove note from old user`
+      });
+    } else {
+      const userToAddNoteTo = await Users.findOneAndUpdate(
+        { _id: assignedUserId },
+        { $push: { notes: noteToUpdate } }
+      );
+      if (!userToAddNoteTo) {
+        return res.status(400).json({
+          message: `Unable to add note to new user`
+        })
+      }
+    }
+  }
+
+  const updatedNote = await Notes.findOneAndUpdate(
+    { _id: id },
+    {
+      assignedUserId,
+      title,
+      content,
+      isCompleted
+    }
+  );
+
+  if (!updatedNote) {
+    return res.status(400).json({
+      message: 'Unable to update note'
+    });
+  } else {
+    res.status(200).json({
+      message: `Note ${updatedNote.title} updated successfully`
+    });
+  }
 });
 
 
