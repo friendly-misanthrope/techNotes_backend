@@ -3,7 +3,7 @@ const Users = require('../models/User.model');
 const asyncHandler = require('express-async-handler');
 
 // toDo: import custom validation middleware here
-
+const { validateObjId } = require('../middleware/userValidations');
 
 
 /* GET ALL NOTES WITH THEIR USER */
@@ -12,7 +12,7 @@ const getAllNotesWithUser = asyncHandler(async (req, res) => {
   // Ensure that notes exist in DB
   const allNotes = await Notes.find().lean();
   if (!allNotes?.length) {
-    return res.status(400).json({
+    return res.status(404).json({
       message: `No notes found`
     });
   }
@@ -66,7 +66,7 @@ const createNote = asyncHandler(async (req, res) => {
     .lean().exec();
   // Ensure user exists in DB before assigning them a note
   if (!foundUser) {
-    return res.status(400).json({
+    return res.status(404).json({
       message: `User with ID ${assignedUserId} not found`
     });
   }
@@ -111,7 +111,7 @@ const createNote = asyncHandler(async (req, res) => {
 /* UPDATE NOTE AND/OR ITS ASSIGNED USER */
 // toDo: Ensure there's no duplicate note title belonging to the assigned user
 const updateNote = asyncHandler(async (req, res) => {
-  
+
   // Validate note ObjId
   const id = req.params.id;
   if (!validateObjId(req, res)) {
@@ -125,55 +125,75 @@ const updateNote = asyncHandler(async (req, res) => {
     isCompleted
   } = req.body;
 
-  // Ensure note exists
+  // Ensure note exists, send 404 if not
   const noteToUpdate = await Notes.findById(id)
     .lean().exec();
   if (!noteToUpdate) {
-    return res.status(400).json({
+    return res.status(404).json({
       message: `Note with ID ${id} not found`
     });
   }
 
-  //toDo:  if assignedUserId changes,
-  //todo   remove note from old user
-  //todo   and assign it to the new user
+  // Ensure no duplicate titles exist for
+  // the newly assigned user
+  const duplicate = await Notes.findOne({
+    assignedUser: assignedUserId,
+    title: title
+  });
+  if (duplicate) {
+    return res.status(409).json({
+      message: `This user already has a note titled '${title}'`
+    });
+  }
+
+  // If note's original assigned user is different than the
+  // assignedUserId from req.body, remove the note from the
+  // original user's 'notes' array
   if (noteToUpdate.assignedUser !== assignedUserId) {
-    const userToRemoveNoteFrom = await Users.findOneAndUpdate(
+    const oldUser = await Users.findOneAndUpdate(
       { _id: noteToUpdate.assignedUser },
-      // pull note id from old user, push to new user
-      { $pull: { notes: noteToUpdate } }
+      { $pull: { notes: noteToUpdate._id } },
+      { new: true }
     );
-    if (!userToRemoveNoteFrom) {
+
+    // If the update to remove note from original user
+    // fails, return 400 bad req & message
+    if (!oldUser) {
       return res.status(400).json({
         message: `Could not remove note from old user`
       });
     } else {
-      const userToAddNoteTo = await Users.findOneAndUpdate(
+      // Add note to it's new user
+      const newUser = await Users.findOneAndUpdate(
         { _id: assignedUserId },
-        { $push: { notes: noteToUpdate } }
+        { $push: { notes: noteToUpdate } },
+        { new: true }
       );
-      if (!userToAddNoteTo) {
+
+      // If the update to add note to it's new user
+      // fails, return 400 bad req & message
+      if (!newUser) {
         return res.status(400).json({
           message: `Unable to add note to new user`
-        })
+        });
       }
     }
   }
-
+  
+  // Update note with new data from req.body  
   const updatedNote = await Notes.findOneAndUpdate(
     { _id: id },
-    {
-      assignedUserId,
-      title,
-      content,
-      isCompleted
-    }
+    { assignedUser: assignedUserId, title, content, isCompleted },
+    { new: true }
   );
 
+  // If note update fails,
+  // return 400 bad req & message
   if (!updatedNote) {
     return res.status(400).json({
       message: 'Unable to update note'
     });
+    // Otherwise, send response status 200 & success message
   } else {
     res.status(200).json({
       message: `Note ${updatedNote.title} updated successfully`
