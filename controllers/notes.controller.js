@@ -8,7 +8,7 @@ const asyncHandler = require('express-async-handler');
 
 /* GET ALL NOTES WITH THEIR USER */
 const getAllNotesWithUser = asyncHandler(async (req, res) => {
-  
+
   // Ensure that notes exist in DB
   const allNotes = await Notes.find().lean();
   if (!allNotes?.length) {
@@ -21,12 +21,15 @@ const getAllNotesWithUser = asyncHandler(async (req, res) => {
   // retrieve it's assigned user by ObjId
   // and overwrite note.assignedUser with
   // user doc
-  const notesWithUser = await Promise.all(allNotes.map(asyncHandler(async (note) => {
-    const noteUser = await Users.findById(note.assignedUser).select('-password -notes').lean().exec();
-    note.assignedUser = noteUser;
-    return note;
-  })));
-
+  const notesWithUser = await Promise.all(
+    allNotes.map(asyncHandler(async (note) => {
+      const noteUser = await Users.findById(note.assignedUser)
+        .select('-password -notes').lean().exec();
+      note.assignedUser = noteUser;
+      return note;
+    }))
+  );
+  // Send status 200 & notes with their respective user doc
   return res.status(200).json(notesWithUser);
 });
 
@@ -34,9 +37,16 @@ const getAllNotesWithUser = asyncHandler(async (req, res) => {
 /* GET ONE NOTE WITH ITS USER */
 const getOneNoteWithUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
+
+  // Find note and user in DB
   const note = await Notes.findById(id).lean().exec();
-  const user = await Users.findById(note.assignedUser).select('-password -notes').lean().exec();
+  const user = await Users.findById(note.assignedUser)
+    .select('-password -notes').lean().exec();
+
+  // Overwrite note's assignedUser field with user doc
   const noteWithUser = { ...note, assignedUser: user };
+
+  // Send status 200 and note with user
   return res.status(200).json(noteWithUser);
 });
 
@@ -50,8 +60,10 @@ const createNote = asyncHandler(async (req, res) => {
     content
   } = req.body;
 
+  // Use assignedUserId to retrieve user doc from DB
+  const foundUser = await Users.findById(assignedUserId)
+    .lean().exec();
   // Ensure user exists in DB before assigning them a note
-  const foundUser = await Users.findById(assignedUserId).lean().exec();
   if (!foundUser) {
     return res.status(400).json({
       message: `User with ID ${assignedUserId} not found`
@@ -97,7 +109,7 @@ const createNote = asyncHandler(async (req, res) => {
 
 /* UPDATE NOTE AND/OR ITS ASSIGNED USER */
 const updateNote = asyncHandler(async (req, res) => {
-  
+
 });
 
 
