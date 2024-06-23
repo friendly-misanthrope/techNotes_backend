@@ -197,9 +197,9 @@ const removeNote = asyncHandler(async (req, res) => {
   }
 
   // Get note and it's assignedUser from DB
-  const noteToRemove = await Notes.findById(id).lean().exec();
+  const noteToRemove = await Notes.findById(id).exec();
   const noteUser = await Users.findById(noteToRemove.assignedUser)
-    .lean().exec();
+    .exec();
 
   // Ensure both note and user exist
   if (!noteToRemove) {
@@ -213,18 +213,19 @@ const removeNote = asyncHandler(async (req, res) => {
   }
 
   // Delete note
-  const result = Notes.findOneAndDelete({ _id: id });
+  const result = await Notes.findOneAndDelete({ _id: id });
   if (!result) {
     return res.status(400).json({
       message: `Unable to remove note`
     });
     // Pull note ObjectId from assignedUser's 'notes' array
   } else {
-    const updatedUser = Users.findOneAndUpdate(
+    const updatedUser = await Users.findOneAndUpdate(
       { _id: noteUser._id },
       { $pull: { notes: noteToRemove._id } },
       { new: true }
     );
+    console.log(updatedUser)
     if (!updatedUser) {
       return res.status(400).json({
         message: `Unable to delete note from user`
