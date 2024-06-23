@@ -196,12 +196,25 @@ if (!validateObjId(req, res)) {
   return;
 }
 const noteToRemove = await Notes.findById(id).lean().exec();
+const noteUser = await Users.findById(noteToRemove.assignedUser)
+  .lean().exec();
 
 if (!noteToRemove) {
   return res.status(400).json({
     message: `No note with ID ${id} found`
-  })
+  });
+} else if (!noteUser) {
+  return res.status(404).json({
+    message: `User with ID ${noteToRemove.assignedUser} not found`
+  });
 }
+
+// Delete note
+
+// Pull note ObjectId from assignedUser's 'notes' array
+
+// Return response
+
 });
 
 module.exports = {
