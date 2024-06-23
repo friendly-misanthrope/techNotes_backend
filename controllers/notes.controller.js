@@ -109,7 +109,6 @@ const createNote = asyncHandler(async (req, res) => {
 
 
 /* UPDATE NOTE AND/OR ITS ASSIGNED USER */
-// toDo: Ensure there's no duplicate note title belonging to the assigned user
 const updateNote = asyncHandler(async (req, res) => {
 
   // Validate note ObjId
@@ -131,18 +130,6 @@ const updateNote = asyncHandler(async (req, res) => {
   if (!noteToUpdate) {
     return res.status(404).json({
       message: `Note with ID ${id} not found`
-    });
-  }
-
-  // Ensure no duplicate titles exist for
-  // the newly assigned user
-  const duplicate = await Notes.findOne({
-    assignedUser: assignedUserId,
-    title: title
-  });
-  if (duplicate) {
-    return res.status(409).json({
-      message: `This user already has a note titled '${title}'`
     });
   }
 
@@ -196,15 +183,25 @@ const updateNote = asyncHandler(async (req, res) => {
     // Otherwise, send response status 200 & success message
   } else {
     res.status(200).json({
-      message: `Note ${updatedNote.title} updated successfully`
+      message: `Note '${updatedNote.title}' updated successfully`
     });
   }
 });
 
 
-/* DELETE NOTE */
+/* DELETE NOTE */ 
 const removeNote = asyncHandler(async (req, res) => {
+const id = req.params.id;
+if (!validateObjId(req, res)) {
+  return;
+}
+const noteToRemove = await Notes.findById(id).lean().exec();
 
+if (!noteToRemove) {
+  return res.status(400).json({
+    message: `No note with ID ${id} found`
+  })
+}
 });
 
 module.exports = {
