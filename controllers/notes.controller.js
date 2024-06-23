@@ -225,7 +225,6 @@ const removeNote = asyncHandler(async (req, res) => {
       { $pull: { notes: noteToRemove._id } },
       { new: true }
     );
-    console.log(updatedUser)
     if (!updatedUser) {
       return res.status(400).json({
         message: `Unable to delete note from user`
