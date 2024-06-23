@@ -166,7 +166,7 @@ const updateNote = asyncHandler(async (req, res) => {
       }
     }
   }
-  
+
   // Update note with new data from req.body  
   const updatedNote = await Notes.findOneAndUpdate(
     { _id: id },
@@ -189,32 +189,52 @@ const updateNote = asyncHandler(async (req, res) => {
 });
 
 
-/* DELETE NOTE */ 
+/* DELETE NOTE */
 const removeNote = asyncHandler(async (req, res) => {
-const id = req.params.id;
-if (!validateObjId(req, res)) {
-  return;
-}
-const noteToRemove = await Notes.findById(id).lean().exec();
-const noteUser = await Users.findById(noteToRemove.assignedUser)
-  .lean().exec();
+  const id = req.params.id;
+  if (!validateObjId(req, res)) {
+    return;
+  }
 
-if (!noteToRemove) {
-  return res.status(400).json({
-    message: `No note with ID ${id} found`
-  });
-} else if (!noteUser) {
-  return res.status(404).json({
-    message: `User with ID ${noteToRemove.assignedUser} not found`
-  });
-}
+  // Get note and it's assignedUser from DB
+  const noteToRemove = await Notes.findById(id).lean().exec();
+  const noteUser = await Users.findById(noteToRemove.assignedUser)
+    .lean().exec();
 
-// Delete note
+  // Ensure both note and user exist
+  if (!noteToRemove) {
+    return res.status(404).json({
+      message: `No note with ID ${id} found`
+    });
+  } else if (!noteUser) {
+    return res.status(404).json({
+      message: `User with ID ${noteToRemove.assignedUser} not found`
+    });
+  }
 
-// Pull note ObjectId from assignedUser's 'notes' array
-
-// Return response
-
+  // Delete note
+  const result = Notes.findOneAndDelete({ _id: id });
+  if (!result) {
+    return res.status(400).json({
+      message: `Unable to remove note`
+    });
+    // Pull note ObjectId from assignedUser's 'notes' array
+  } else {
+    const updatedUser = Users.findOneAndUpdate(
+      { _id: noteUser._id },
+      { $pull: { notes: noteToRemove._id } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(400).json({
+        message: `Unable to delete note from user`
+      });
+    }
+    // If note deleted and user updated, send response
+    res.status(200).json({
+      message: `Note ${noteToRemove.title} with ID ${noteToRemove._id} removed successfully`
+    });
+  }
 });
 
 module.exports = {
