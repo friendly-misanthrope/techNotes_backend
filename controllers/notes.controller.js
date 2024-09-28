@@ -56,24 +56,24 @@ const getOneNoteWithUser = asyncHandler(async (req, res) => {
 const createNote = asyncHandler(async (req, res) => {
 
   const {
-    assignedUserId,
+    assignedUser,
     title,
     content
   } = req.body;
 
-  // Use assignedUserId to retrieve user doc from DB
-  const foundUser = await Users.findById(assignedUserId)
+  // Use assignedUser to retrieve user doc from DB
+  const foundUser = await Users.findById(assignedUser)
     .lean().exec();
   // Ensure user exists in DB before assigning them a note
   if (!foundUser) {
     return res.status(404).json({
-      message: `User with ID ${assignedUserId} not found`
+      message: `User with ID ${assignedUser} not found`
     });
   }
 
   // Create new note from req.body
   const newNote = await Notes.create({
-    assignedUser: assignedUserId,
+    assignedUser: assignedUser,
     title,
     content
   });
@@ -118,7 +118,7 @@ const updateNote = asyncHandler(async (req, res) => {
   }
 
   const {
-    assignedUserId,
+    assignedUser,
     title,
     content,
     isCompleted
@@ -136,7 +136,7 @@ const updateNote = asyncHandler(async (req, res) => {
   // If note's original assigned user is different than the
   // assignedUserId from req.body, remove the note from the
   // original user's 'notes' array
-  if (noteToUpdate.assignedUser !== assignedUserId) {
+  if (noteToUpdate.assignedUser !== assignedUser) {
     const oldUser = await Users.findOneAndUpdate(
       { _id: noteToUpdate.assignedUser },
       { $pull: { notes: noteToUpdate._id } },
@@ -152,7 +152,7 @@ const updateNote = asyncHandler(async (req, res) => {
     } else {
       // Add note to it's new user
       const newUser = await Users.findOneAndUpdate(
-        { _id: assignedUserId },
+        { _id: assignedUser },
         { $push: { notes: noteToUpdate } },
         { new: true }
       );
@@ -167,10 +167,10 @@ const updateNote = asyncHandler(async (req, res) => {
     }
   }
 
-  // Update note with new data from req.body  
+  // Update note with new data from req.body
   const updatedNote = await Notes.findOneAndUpdate(
     { _id: id },
-    { assignedUser: assignedUserId, title, content, isCompleted },
+    { assignedUser, title, content, isCompleted },
     { new: true }
   );
 
