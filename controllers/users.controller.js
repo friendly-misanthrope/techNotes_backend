@@ -38,7 +38,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
 /* REGISTER NEW USER */
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, roles } = req.body;
 
   // Check for duplicate usernames
   const duplicate = await Users.findOne({ username: username }).lean().exec();
@@ -65,7 +65,8 @@ const registerUser = asyncHandler(async (req, res) => {
   // Create user with username and hashed password
   const newUser = await Users.create({
     username,
-    password: pwHash
+    password: pwHash,
+    roles
   });
 
   if (newUser) {

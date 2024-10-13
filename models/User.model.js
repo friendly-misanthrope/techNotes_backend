@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.pre('save', function(next) {
   if (this.roles.length < 1) {
-    this.roles.push("Employee")
+    this.roles.push("employee")
   }
   next();
 })
